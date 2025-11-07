@@ -1,0 +1,32 @@
+[
+  {
+    "id": "C001",
+    "name": "Edward Culen",
+    "sex": "male",
+    "dob": "1967-04-14",
+    "address": "123 Sample St, Waterloo, ON",
+    "deviceModel": "WPT-IMPL-2",
+    "history": [
+      "Amber at 12–15° misalignment (past 3 sessions)",
+      "Stable temps under 38 °C",
+      "Load spikes during treadmill sessions"
+    ],
+    "baseline": { "coilOffsetDeg": 3, "chargeRateC": 1.0, "tempC": 36.8, "load_mA": 180 },
+    "factors": { "misalign": 1.2, "rate": 1.0, "temp": 0.9, "load": 1.1 }
+  },
+  {
+    "id": "C002",
+    "name": "Kalliyankattu Neeli",
+    "sex": "female",
+    "dob": "1976-11-03",
+    "address": "45 Example Ave, Kitchener, ON",
+    "deviceModel": "WPT-IMPL-2F",
+    "history": [
+      "Amber above 1.6 C charge rate",
+      "Occasional local heating up to 39.5 °C",
+      "No misalignment issues reported"
+    ],
+    "baseline": { "coilOffsetDeg": 6, "chargeRateC": 1.3, "tempC": 37.1, "load_mA": 210 },
+    "factors": { "misalign": 0.9, "rate": 1.3, "temp": 1.2, "load": 1.0 }
+  }
+]

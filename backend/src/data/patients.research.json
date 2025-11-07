@@ -1,0 +1,116 @@
+[
+  {
+    "id": "M01",
+    "sex": "male",
+    "age": 58,
+    "deviceModel": "WPT-IMPL-2",
+    "displayName": "Profile M01 (Male, 58)",
+    "history": [
+      "Amber at 12–15° misalignment (past 3 sessions)",
+      "Stable temps under 38 °C",
+      "Load spikes during exercise"
+    ],
+    "baseline": { "coilOffsetDeg": 3, "chargeRateC": 1.0, "tempC": 36.8, "load_mA": 180 },
+    "factors": { "misalign": 1.2, "rate": 1.0, "temp": 0.9, "load": 1.1 }
+  },
+  {
+    "id": "F01",
+    "sex": "female",
+    "age": 49,
+    "deviceModel": "WPT-IMPL-2F",
+    "displayName": "Profile F01 (Female, 49)",
+    "history": [
+      "Amber above 1.6 C charge rate",
+      "Occasional heating up to 39.5 °C",
+      "No misalignment issues"
+    ],
+    "baseline": { "coilOffsetDeg": 6, "chargeRateC": 1.3, "tempC": 37.1, "load_mA": 210 },
+    "factors": { "misalign": 0.9, "rate": 1.3, "temp": 1.2, "load": 1.0 }
+  },
+
+  {
+    "id": "M02",
+    "sex": "male",
+    "age": 57,
+    "deviceModel": "WPT-IMPL-2",
+    "displayName": "Profile M02 (Male, 57)",
+    "history": [
+      "Amber at 12–14° misalignment (recent sessions)",
+      "Temperatures under 38 °C remain stable",
+      "Load spikes during moderate exercise"
+    ],
+    "baseline": { "coilOffsetDeg": 4, "chargeRateC": 1.0, "tempC": 36.7, "load_mA": 185 },
+    "factors": { "misalign": 1.2, "rate": 1.0, "temp": 0.9, "load": 1.1 }
+  },
+  {
+    "id": "M03",
+    "sex": "male",
+    "age": 60,
+    "deviceModel": "WPT-IMPL-2",
+    "displayName": "Profile M03 (Male, 60)",
+    "history": [
+      "Amber around 13–15° misalignment (past 2 sessions)",
+      "Stable temps < 38 °C",
+      "Exercise-induced load bursts"
+    ],
+    "baseline": { "coilOffsetDeg": 2, "chargeRateC": 1.1, "tempC": 36.9, "load_mA": 190 },
+    "factors": { "misalign": 1.2, "rate": 1.0, "temp": 0.9, "load": 1.1 }
+  },
+  {
+    "id": "M04",
+    "sex": "male",
+    "age": 55,
+    "deviceModel": "WPT-IMPL-2",
+    "displayName": "Profile M04 (Male, 55)",
+    "history": [
+      "Amber onset near 12° misalignment",
+      "No sustained heating above 38 °C",
+      "Load spikes primarily during cardio"
+    ],
+    "baseline": { "coilOffsetDeg": 5, "chargeRateC": 1.0, "tempC": 36.6, "load_mA": 175 },
+    "factors": { "misalign": 1.15, "rate": 1.0, "temp": 0.9, "load": 1.1 }
+  },
+
+  {
+    "id": "F02",
+    "sex": "female",
+    "age": 50,
+    "deviceModel": "WPT-IMPL-2F",
+    "displayName": "Profile F02 (Female, 50)",
+    "history": [
+      "Amber above 1.6 C charge rate",
+      "Occasional heating up to 39–39.5 °C",
+      "No misalignment concerns reported"
+    ],
+    "baseline": { "coilOffsetDeg": 7, "chargeRateC": 1.3, "tempC": 37.0, "load_mA": 215 },
+    "factors": { "misalign": 0.9, "rate": 1.3, "temp": 1.2, "load": 1.0 }
+  },
+  {
+    "id": "F03",
+    "sex": "female",
+    "age": 47,
+    "deviceModel": "WPT-IMPL-2F",
+    "displayName": "Profile F03 (Female, 47)",
+    "history": [
+      "Amber risk when charge rate exceeds ~1.6 C",
+      "Brief local heating up to 39.4 °C",
+      "No misalignment issues observed"
+    ],
+    "baseline": { "coilOffsetDeg": 6, "chargeRateC": 1.4, "tempC": 37.2, "load_mA": 205 },
+    "factors": { "misalign": 0.9, "rate": 1.3, "temp": 1.2, "load": 1.0 }
+  },
+  {
+    "id": "F04",
+    "sex": "female",
+    "age": 52,
+    "deviceModel": "WPT-IMPL-2F",
+    "displayName": "Profile F04 (Female, 52)",
+    "history": [
+      "Amber primarily above 1.6 C charge",
+      "Occasional hot spots up to 39.5 °C",
+      "No notable misalignment problems"
+    ],
+    "baseline": { "coilOffsetDeg": 5, "chargeRateC": 1.2, "tempC": 37.1, "load_mA": 220 },
+    "factors": { "misalign": 0.9, "rate": 1.25, "temp": 1.15, "load": 1.0 }
+  }
+]
