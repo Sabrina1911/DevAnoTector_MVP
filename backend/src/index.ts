@@ -2,9 +2,16 @@
 import express, { Request } from "express";
 import cors from "cors";
 import { z } from "zod";
-
+import { PrismaClient } from "@prisma/client";
 import phiPatientsJson from "./data/patients.phi.json";
 import researchPatientsJson from "./data/patients.research.json";
+
+
+const prisma = new PrismaClient();
+
+
+// import phiPatientsJson from "./data/patients.phi.json";
+// import researchPatientsJson from "./data/patients.research.json";
 
 // ---------------- Types ----------------
 type Factors = { misalign?: number; rate?: number; temp?: number; load?: number };
@@ -42,37 +49,72 @@ function getRole(req: Request): Role {
 }
 
 // --------------- Patients API -----------
-app.get("/patients", (req, res) => {
+// --------------- Patients API -----------
+app.get("/patients", async (req, res) => {
   const role = getRole(req);
-  if (role === "clinician") {
+
+  try {
+    if (role === "clinician") {
+      const patients = await prisma.phiPatient.findMany();
+
+      return res.json(
+        patients.map((p) => ({
+          id: p.id,
+          name: p.name,
+          sex: p.sex,
+          dob: p.dob, // DateTime from Prisma, will serialize as ISO string
+          address: p.address,
+          deviceModel: p.deviceModel,
+          history: JSON.parse(p.historyJson),
+
+          baseline: {
+            coilOffsetDeg: p.coilOffsetDeg,
+            chargeRateC: p.chargeRateC,
+            tempC: p.tempC,
+            load_mA: p.load_mA,
+          },
+          factors: {
+            misalign: p.factorMisalign,
+            rate: p.factorRate,
+            temp: p.factorTemp,
+            load: p.factorLoad,
+          },
+        }))
+      );
+    }
+
+    // Engineer view: research (de-identified) patients
+    const patients = await prisma.researchPatient.findMany();
+
     return res.json(
-      (phiPatients as PhiPatient[]).map((p) => ({
+      patients.map((p) => ({
         id: p.id,
-        name: p.name,
+        displayName: p.displayName,
         sex: p.sex,
-        dob: p.dob,
-        address: p.address,
+        age: p.age,
         deviceModel: p.deviceModel,
-        history: p.history ?? [],
-        baseline: p.baseline,
-        factors: p.factors
+        history: JSON.parse(p.historyJson),
+
+        baseline: {
+          coilOffsetDeg: p.coilOffsetDeg,
+          chargeRateC: p.chargeRateC,
+          tempC: p.tempC,
+          load_mA: p.load_mA,
+        },
+        factors: {
+          misalign: p.factorMisalign,
+          rate: p.factorRate,
+          temp: p.factorTemp,
+          load: p.factorLoad,
+        },
       }))
     );
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to load patients" });
   }
-  // Engineer (de-identified)
-  return res.json(
-    (researchPatients as ResearchPatient[]).map((p) => ({
-      id: p.id,
-      displayName: p.displayName,
-      sex: p.sex,
-      age: p.age,
-      deviceModel: p.deviceModel,
-      history: p.history ?? [],
-      baseline: p.baseline,
-      factors: p.factors
-    }))
-  );
 });
+
 
 // ------- Simulation schema & helpers ----
 const InputSchema = z.object({
@@ -87,21 +129,72 @@ type Inputs = {
 };
 
 // Merge patient baseline (by role) + UI overrides
-function buildInputs(req: Request, body: z.infer<typeof InputSchema>): Inputs {
+// Merge patient baseline + UI overrides
+function buildInputs(
+  body: Partial<z.infer<typeof InputSchema>>,
+  baselineFromDb?: Inputs
+): Inputs {
   let base: Inputs = { coilOffsetDeg: 5, chargeRateC: 1, tempC: 37, load_mA: 200 };
-  if (body.patientId) {
-    const role = getRole(req);
-    const list = role === "clinician" ? (phiPatients as PhiPatient[]) : (researchPatients as ResearchPatient[]);
-    const p = list.find((x) => x.id === body.patientId);
-    if (p?.baseline) base = { ...base, ...p.baseline };
+
+  if (baselineFromDb) {
+    base = { ...base, ...baselineFromDb };
   }
+
   return {
     coilOffsetDeg: body.coilOffsetDeg ?? base.coilOffsetDeg,
     chargeRateC:   body.chargeRateC   ?? base.chargeRateC,
     tempC:         body.tempC         ?? base.tempC,
-    load_mA:       body.load_mA       ?? base.load_mA
+    load_mA:       body.load_mA       ?? base.load_mA,
   };
 }
+
+
+async function getPatientDefaults(
+  role: Role,
+  patientId: string
+): Promise<{ baseline?: Inputs; factors?: Factors }> {
+  if (role === "clinician") {
+    const p = await prisma.phiPatient.findUnique({ where: { id: patientId } });
+    if (!p) return {};
+
+    const baseline: Inputs = {
+      coilOffsetDeg: p.coilOffsetDeg,
+      chargeRateC: p.chargeRateC,
+      tempC: p.tempC,
+      load_mA: p.load_mA,
+    };
+
+    const factors: Factors = {
+      misalign: p.factorMisalign,
+      rate: p.factorRate,
+      temp: p.factorTemp,
+      load: p.factorLoad,
+    };
+
+    return { baseline, factors };
+  }
+
+  const p = await prisma.researchPatient.findUnique({ where: { id: patientId } });
+  if (!p) return {};
+
+  const baseline: Inputs = {
+    coilOffsetDeg: p.coilOffsetDeg,
+    chargeRateC: p.chargeRateC,
+    tempC: p.tempC,
+    load_mA: p.load_mA,
+  };
+
+  const factors: Factors = {
+    misalign: p.factorMisalign,
+    rate: p.factorRate,
+    temp: p.factorTemp,
+    load: p.factorLoad,
+  };
+
+  return { baseline, factors };
+}
+
+
 
 // ------------- Weighted simulate --------
 function simulate(inputs: Inputs, factors?: Factors) {
@@ -149,28 +242,36 @@ function simulate(inputs: Inputs, factors?: Factors) {
 }
 
 // --------------- Simulate API -----------
-app.post("/simulate", (req, res) => {
+app.post("/simulate", async (req, res) => {
   const parsed = InputSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-
-  const body = parsed.data;
-  const inputs = buildInputs(req, body);
-
-  let factors: Factors | undefined;
-  if (body.patientId) {
-    const role = getRole(req);
-    const list = role === "clinician" ? (phiPatients as PhiPatient[]) : (researchPatients as ResearchPatient[]);
-    const p = list.find((x) => x.id === body.patientId);
-    if (p?.factors) factors = p.factors;
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.flatten() });
   }
 
+  const body = parsed.data;
+  const role = getRole(req);
+
+  let baselineFromDb: Inputs | undefined;
+  let factors: Factors | undefined;
+
+  if (body.patientId) {
+    const defaults = await getPatientDefaults(role, body.patientId);
+    baselineFromDb = defaults.baseline;
+    factors = defaults.factors;
+  }
+
+  const inputs = buildInputs(body, baselineFromDb);
   return res.json(simulate(inputs, factors));
 });
 
+
+
 // --------- Simulate sweep (for charts) --
-app.post("/simulate/sweep", (req, res) => {
-  const parsed = InputSchema.partial().safeParse(req.body); // allow partials
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+app.post("/simulate/sweep", async (req, res) => {
+  const parsed = InputSchema.partial().safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.flatten() });
+  }
 
   const body = parsed.data as any;
   const from = Math.max(0, Number(body.from ?? 0));
@@ -178,23 +279,28 @@ app.post("/simulate/sweep", (req, res) => {
   const stepRaw = Number(body.step ?? 1);
   const step = stepRaw > 0 ? stepRaw : 1;
 
-  const inputsBase = buildInputs(req, body);
+  const role = getRole(req);
 
+  let baselineFromDb: Inputs | undefined;
   let factors: Factors | undefined;
+
   if (body.patientId) {
-    const role = getRole(req);
-    const list = role === "clinician" ? (phiPatients as PhiPatient[]) : (researchPatients as ResearchPatient[]);
-    const p = list.find((x) => x.id === body.patientId);
-    if (p?.factors) factors = p.factors;
+    const defaults = await getPatientDefaults(role, body.patientId);
+    baselineFromDb = defaults.baseline;
+    factors = defaults.factors;
   }
+
+  const inputsBase = buildInputs(body, baselineFromDb);
 
   const data: { deg: number; score: number }[] = [];
   for (let deg = from; deg <= to; deg += step) {
     const out = simulate({ ...inputsBase, coilOffsetDeg: deg }, factors);
     data.push({ deg, score: out.score });
   }
+
   res.json({ patientId: body.patientId ?? null, from, to, step, data });
 });
+
 
 // --------------- Start server -----------
 const port = process.env.PORT || 5050;

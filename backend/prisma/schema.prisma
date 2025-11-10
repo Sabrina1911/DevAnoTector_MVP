@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")  
+}
+
+model PhiPatient {
+  id            String   @id
+  name          String
+  sex           String
+  dob           DateTime
+  address       String
+  deviceModel   String
+
+  // Baseline telemetry
+  coilOffsetDeg Int
+  chargeRateC   Float
+  tempC         Float
+  load_mA       Int
+
+  // Sensitivity factors
+  factorMisalign Float
+  factorRate     Float
+  factorTemp     Float
+  factorLoad     Float
+
+  // JSON string with history[]
+  historyJson   String
+}
+
+model ResearchPatient {
+  id            String   @id
+  sex           String
+  age           Int
+  deviceModel   String
+  displayName   String
+
+  coilOffsetDeg Int
+  chargeRateC   Float
+  tempC         Float
+  load_mA       Int
+
+  factorMisalign Float
+  factorRate     Float
+  factorTemp     Float
+  factorLoad     Float
+
+  historyJson   String
+}
