@@ -4,15 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon --watch src --exec ts-node src/index.ts",
-  "test": "vitest run"
-},
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "test": "vitest run"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "zod": "^4.1.12"
   },
@@ -21,6 +26,7 @@
     "@types/express": "^5.0.5",
     "@types/node": "^24.9.2",
     "nodemon": "^3.1.10",
+    "prisma": "^6.19.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.5"
