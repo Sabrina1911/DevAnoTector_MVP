@@ -1,5 +1,5 @@
 // frontend/src/components/RiskChart.tsx
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceArea, Legend,
